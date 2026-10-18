@@ -1,0 +1,11 @@
+# SmartStudy AI — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core Google AI
+google-genai>=0.1.0
+
+# Web Interface
+gradio>=4.40.0
+
+# Environment variable management
+python-dotenv>=1.0.0
