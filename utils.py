@@ -163,3 +163,76 @@ def format_plan_as_text(plan: dict) -> str:
             lines.append(f"  {i}. {tip}")
 
     return "\n".join(lines)
+
+def format_explanation_as_text(exp: dict) -> str:
+    """
+    Convert a parsed concept explanation JSON into clean, readable text for display.
+    """
+    if "error" in exp:
+        return f"Error: {exp['error']}\n\nRaw response:\n{exp.get('raw_response', '')}"
+
+    lines = []
+    lines.append(f"Concept: {exp.get('concept', 'N/A')}")
+    lines.append(f"Difficulty: {'*' * int(exp.get('difficulty_rating', 5))} ({exp.get('difficulty_rating', '?')}/10)")
+    lines.append(f"⏱Estimated Study Time: {exp.get('estimated_study_time_minutes', 'N/A')} minutes")
+    lines.append(f"Level: {exp.get('level', 'N/A')}  |  Language: {exp.get('language', 'N/A')}")
+
+    if exp.get("warning"):
+        lines.append(f"\nNote: {exp['warning']}")
+
+    lines.append("\n" + "─" * 60)
+    lines.append(f"\nSimple Definition:\n{exp.get('simple_definition', 'N/A')}")
+    lines.append(f"\nDetailed Explanation:\n{exp.get('detailed_explanation', 'N/A')}")
+
+    if exp.get("analogy"):
+        lines.append(f"\nAnalogy:\n{exp['analogy']}")
+
+    if exp.get("real_world_example"):
+        lines.append(f"\nReal-World Example:\n{exp['real_world_example']}")
+
+    key_points = exp.get("key_points", [])
+    if key_points:
+        lines.append("\nKey Points:")
+        for p in key_points:
+            lines.append(f"  • {p}")
+
+    misconceptions = exp.get("common_misconceptions", [])
+    if misconceptions:
+        lines.append("\n Common Misconceptions:")
+        for m in misconceptions:
+            lines.append(f"  • {m}")
+
+    study_tips = exp.get("study_tips", [])
+    if study_tips:
+        lines.append("\nStudy Tips:")
+        for t in study_tips:
+            lines.append(f"  • {t}")
+
+    related = exp.get("related_concepts", [])
+    if related:
+        lines.append(f"\nRelated Concepts: {', '.join(related)}")
+
+    return "\n".join(lines)
+
+
+def format_followup_as_text(resp: dict) -> str:
+    """
+    Format a follow-up conversation response for display.
+    """
+    if "error" in resp:
+        return f"Error: {resp['error']}"
+
+    lines = []
+    lines.append(f"{resp.get('message', 'N/A')}")
+
+    steps = resp.get("suggested_next_steps", [])
+    if steps:
+        lines.append("\nSuggested Next Steps:")
+        for s in steps:
+            lines.append(f"  → {s}")
+
+    summary = resp.get("session_summary", "")
+    if summary:
+        lines.append(f"\nSession So Far: {summary}")
+
+    return "\n".join(lines)
