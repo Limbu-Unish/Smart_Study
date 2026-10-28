@@ -113,3 +113,53 @@ def validate_explanation(data: dict) -> tuple[bool, list[str]]:
     ]
     missing = [f for f in required if f not in data]
     return (len(missing) == 0), missing
+
+# FORMATTING HELPERS
+
+def format_plan_as_text(plan: dict) -> str:
+    """
+    Convert a parsed study plan JSON into clean, readable text for display.
+    """
+    if "error" in plan:
+        return f"Error: {plan['error']}\n\nRaw response:\n{plan.get('raw_response', '')}"
+
+    lines = []
+    lines.append(f" {plan.get('plan_title', 'Study Plan')}")
+    lines.append(f" Goal: {plan.get('goal', 'N/A')}")
+    lines.append(f"  Daily Hours: {plan.get('daily_hours', 'N/A')}  |   Total Days: {plan.get('total_days', 'N/A')}")
+    lines.append(f"  Tone: {plan.get('tone', 'N/A')}  |  Language: {plan.get('language', 'N/A')}")
+
+    if plan.get("warning"):
+        lines.append(f"\n  Note: {plan['warning']}")
+
+    lines.append("\n" + "─" * 60)
+
+    for day in plan.get("days", []):
+        # Get date label, or fallback to "Day X" if missing
+        date_label = day.get('date_label') or f"Day {day.get('day', '?')}"
+        lines.append(f"\n{date_label}")
+        lines.append(f"Focus: {day.get('focus_topic', 'N/A')}")
+        lines.append(f"Daily Goal: {day.get('daily_goal', 'N/A')}")
+        lines.append(f"Breaks: {day.get('break_schedule', 'N/A')}")
+        lines.append("")
+
+        for s in day.get("sessions", []):
+            lines.append(f"Session {s.get('session_number', '?')} — {s.get('time_slot', 'N/A')}")
+            lines.append(f"Topic    : {s.get('topic', 'N/A')}")
+            lines.append(f"Activity  : {s.get('activity', 'N/A')}")
+            lines.append(f"Duration  : {s.get('duration_minutes', 'N/A')} minutes")
+            resources = s.get("resources", [])
+            if resources:
+                lines.append(f"Resources : {', '.join(resources)}")
+            lines.append("")
+
+        lines.append(f" {day.get('motivation_tip', '')}")
+        lines.append("─" * 60)
+
+    tips = plan.get("overall_tips", [])
+    if tips:
+        lines.append("\n Overall Study Tips:")
+        for i, tip in enumerate(tips, 1):
+            lines.append(f"  {i}. {tip}")
+
+    return "\n".join(lines)
