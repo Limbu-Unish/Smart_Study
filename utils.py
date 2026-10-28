@@ -60,3 +60,56 @@ def call_gemini(
             raise RuntimeError(f"Unexpected error communicating with Gemini: {str(e)}")
 
     return ""
+
+# JSON PARSING & VALIDATION 
+
+def extract_json(raw: str) -> dict:
+    """
+    Extract and parse a JSON object from Gemini's raw response.
+    Handles cases where the model accidentally adds markdown fences or leading text.
+    """
+    # Strip markdown code fences if present
+    cleaned = re.sub(r"```(?:json)?", "", raw).strip()
+
+    # Try direct parse first
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+
+    # Try finding the first { ... } block
+    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            pass
+
+    # If all else fails, return an error dict
+    return {
+        "error": "Failed to parse JSON from model response.",
+        "raw_response": raw[:500]  # truncate for display
+    }
+
+
+def validate_plan(data: dict) -> tuple[bool, list[str]]:
+    """
+    Validate that a study plan JSON has all required top-level fields.
+    Returns (is_valid, list_of_missing_fields).
+    """
+    required = ["plan_title", "total_days", "daily_hours", "goal", "days", "overall_tips"]
+    missing  = [f for f in required if f not in data]
+    return (len(missing) == 0), missing
+
+
+def validate_explanation(data: dict) -> tuple[bool, list[str]]:
+    """
+    Validate that a concept explanation JSON has all required fields.
+    Returns (is_valid, list_of_missing_fields).
+    """
+    required = [
+        "concept", "simple_definition", "detailed_explanation",
+        "key_points", "study_tips", "difficulty_rating"
+    ]
+    missing = [f for f in required if f not in data]
+    return (len(missing) == 0), missing
