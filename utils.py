@@ -236,3 +236,54 @@ def format_followup_as_text(resp: dict) -> str:
         lines.append(f"\nSession So Far: {summary}")
 
     return "\n".join(lines)
+
+# CONVERSATION HISTORY 
+
+def build_history_string(history: list[dict]) -> str:
+    """
+    Convert a list of conversation turns into a formatted string for the prompt.
+    Each turn is {"role": "user"/"assistant", "content": "..."}.
+    """
+    if not history:
+        return "No previous conversation."
+
+    lines = []
+    for turn in history:
+        role    = "Student" if turn["role"] == "user" else "SmartStudy AI"
+        content = turn["content"]
+        lines.append(f"{role}: {content}")
+
+    return "\n".join(lines)
+
+
+# ── INPUT SANITIZATION ────────────────────────────────────────────────────────
+
+def sanitize_input(text: str, max_length: int = 500) -> str:
+    """
+    Clean and truncate user input to prevent prompt injection or overly long inputs.
+    """
+    if not text:
+        return ""
+    # Strip leading/trailing whitespace
+    text = text.strip()
+    # Remove any attempts at prompt injection (basic)
+    text = re.sub(r"(ignore previous|system prompt|you are now|disregard)", "", text, flags=re.IGNORECASE)
+    # Truncate
+    return text[:max_length]
+
+
+def validate_hours(hours: float) -> tuple[bool, str]:
+    """Validate that study hours are within a sensible range."""
+    if hours <= 0:
+        return False, "Study hours must be greater than 0."
+    if hours > 16:
+        return False, "Study hours cannot exceed 16 per day. Please enter a realistic value."
+    return True, ""
+
+
+def validate_days(days: int) -> tuple[bool, str]:
+    """Validate plan length selection."""
+    mapping = {"short": 1, "medium": 3, "long": 7}
+    if days not in mapping.values() and days not in mapping.keys():
+        return False, "Plan length must be short (1 day), medium (3 days), or long (7 days)."
+    return True, ""
