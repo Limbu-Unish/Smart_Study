@@ -330,3 +330,34 @@ Added complete schema with all fields. Added level-adaptive vocabulary instructi
 
 Added: `"Include analogy: {use_analogy}"` and `"Include real_world_example: {use_example}"` as explicit conditions.
 Claude now respects these settings. `null` is returned for the field when disabled.
+
+---
+
+## Follow-Up Chat Prompt Versions
+
+---
+
+### Version 1.0
+
+```
+You are a tutor. Answer: {user_message}
+```
+
+**Failed:** No memory, no JSON, no context. Every message was independent.
+
+---
+
+### Version 1.1
+
+Added history string. Returned plain text.
+**Improved:** Context carried over. But no JSON structure — couldn't extract suggested_next_steps or session_summary reliably.
+
+---
+
+### Version 1.2 — Final (Current)
+
+Full JSON schema with `response_type`, `message`, `suggested_next_steps`, `updated_topics_covered`, `session_summary`.
+Added: "If student seems confused, detect it and adjust." Added off-topic redirect instruction.
+**Result:** Structured, context-aware, helpful follow-up responses.
+
+---
