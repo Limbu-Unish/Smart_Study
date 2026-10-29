@@ -291,3 +291,42 @@ Start with { and end with }.
 **Remaining known issue:**
 
 - Very technical Nepali terms (e.g., "backpropagation", "gradient descent") remain in English even when Nepali is selected — this is acceptable since no Nepali equivalent exists.
+
+---
+
+## Concept Explainer Prompt Versions
+
+---
+
+### Version 1.0 — Initial
+
+```
+Explain {concept} to a {level} student.
+```
+
+**Failed:** Unstructured text, no JSON, no analogy/example options, no language control.
+
+---
+
+### Version 1.1 — Added JSON + Basic Schema
+
+```
+Explain {concept} and return as JSON with: definition, explanation, example.
+```
+
+**Improved:** Basic JSON but schema too simple. No difficulty rating, no misconceptions, no study tips.
+
+---
+
+### Version 1.2 — Full Schema + Level/Language/Tone
+
+Added complete schema with all fields. Added level-adaptive vocabulary instructions.
+**Improved:** Depth control worked well. Beginner explanations were simpler. Advanced had technical depth.
+**Failed:** Analogy and example were always included even when user set them to "no".
+
+---
+
+### Version 1.3 — Conditional Fields + Final (Current)
+
+Added: `"Include analogy: {use_analogy}"` and `"Include real_world_example: {use_example}"` as explicit conditions.
+Claude now respects these settings. `null` is returned for the field when disabled.
