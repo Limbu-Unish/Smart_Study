@@ -458,6 +458,66 @@ def build_ui():
                     outputs=[chatbot, chat_input]
                 )
 
-            # ── TAB 4: ABOUT ──────────────────────────────────────────────────
+            #TAB 4: ABOUT
             with gr.Tab("About"):
                 gr.Markdown("""
+
+                ## 🎓 SmartStudy AI
+
+**SmartStudy AI** is an AI-powered tool that helps students study smarter — not harder.
+
+---
+
+### 🌟 Features
+| Feature | Description |
+|---|---|
+| Study Planner | Generates personalized, hour-by-hour study schedules |
+| Concept Explainer | Explains any concept at beginner/intermediate/advanced level |
+| AI Tutor Chat | Follow-up Q&A with conversation memory |
+| Bilingual | Full support for English and Nepali (नेपाली) |
+| Tone Options | Friendly / Strict / Motivational modes |
+| JSON Output | Structured output parsed and validated in code |
+
+---
+
+### Who Is This For?
+- **University students** preparing for exams
+- **Nepali students** who want explanations in their native language
+- **Self-learners** who need a structured daily plan
+- **Anyone** who wants to understand a difficult concept clearly
+
+---
+
+### Tech Stack
+- **LLM**: Google Gemini via `gemini-3.8-flash`
+- **Interface**: Gradio
+- **Language**: Python 3.10+
+- **Structured Output**: JSON parsed from LLM responses
+- **Memory**: In-session conversation history
+
+---
+
+### Known Limitations
+- Study plans are AI-generated estimates — always adjust to your actual pace
+- Nepali output quality depends on the concept (technical terms may remain in English)
+- Conversation memory resets when the app restarts
+- Very broad topics (e.g. "explain everything about physics") may produce shallow results
+
+---
+
+### Project Structure
+""")
+
+    return demo
+
+
+# ── ENTRY POINT ───────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    demo = build_ui()
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False,
+        show_error=True
+    )
