@@ -163,3 +163,62 @@ def explain_concept(
         return f"API Error: {str(e)}", "{}"
     except Exception as e:
         return f"Unexpected error: {str(e)}", "{}"
+
+
+#FEATURE 3: FOLLOW-UP CHAT (CONVERSATION MEMORY)
+
+def chat_followup(
+    user_message: str,
+    chat_history: list
+) -> tuple[list, str]:
+    """
+    Handle follow-up questions using conversation memory.
+    Maintains context from previous planner and explainer interactions.
+    """
+    user_message = sanitize_input(user_message, max_length=500)
+
+    if not user_message.strip():
+        chat_history.append(("", "Please type a message first."))
+        return chat_history, ""
+
+    # Build history string from global memory + current chat
+    session_turns = [{"role": "user" if i % 2 == 0 else "assistant", "content": msg}
+                     for i, (user_msg, bot_msg) in enumerate(chat_history)
+                     for msg in [user_msg, bot_msg] if msg]
+    all_history = conversation_history + session_turns
+
+    history_str = build_history_string(all_history[-10:])  # last 10 turns for context
+
+    prompt = FOLLOWUP_PROMPT.format(
+        history=history_str,
+        user_message=user_message
+    )
+
+    try:
+        raw    = call_gemini(prompt, max_tokens=2048)
+        parsed = extract_json(raw)
+
+        if "error" in parsed:
+            response_text = f"Error parsing response: {parsed['error']}"
+        else:
+            response_text = format_followup_as_text(parsed)
+
+        chat_history.append((user_message, response_text))
+        return chat_history, ""
+
+    except ValueError as e:
+        chat_history.append((user_message, f"Configuration Error: {str(e)}"))
+        return chat_history, ""
+    except RuntimeError as e:
+        chat_history.append((user_message, f"API Error: {str(e)}"))
+        return chat_history, ""
+    except Exception as e:
+        chat_history.append((user_message, f"Error: {str(e)}"))
+        return chat_history, ""
+
+
+def clear_chat():
+    """Clear the chat history and global conversation memory."""
+    global conversation_history
+    conversation_history = []
+    return [], ""
